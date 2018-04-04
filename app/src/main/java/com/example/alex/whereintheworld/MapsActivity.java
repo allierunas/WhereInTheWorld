@@ -65,7 +65,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            dialog.setMessage("Please wait....");
+            dialog.setMessage("Hold your horses....");
             dialog.setCanceledOnTouchOutside(false);
             dialog.show();
         }
@@ -98,12 +98,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 String lng = ((JSONArray)jsonObject.get("results")).getJSONObject(0).getJSONObject("geometry")
                         .getJSONObject("location").get("lng").toString();
 
+                String somethingelse = ((JSONArray)jsonObject.get("results")).getJSONObject(0).get("formatted_address").toString();
+                String something = ((JSONArray)jsonObject.get("results")).getJSONObject(0).getJSONObject("geometry").get("location_type").toString();
+                //String something = "beans";
+
                 latDouble = Double.parseDouble(lat);
                 lngDouble = Double.parseDouble(lng);
 
                 updateMap();
 
-                txtCoord.setText(String.format("Coordinates : %s / %s ",lat,lng));
+                txtCoord.setText(String.format("Here in the world: %s | %s \nPrecision: %s\n\n%s",lat,lng,something,somethingelse));
 
                 if(dialog.isShowing())
                     dialog.dismiss();
