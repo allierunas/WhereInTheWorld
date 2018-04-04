@@ -1,6 +1,7 @@
 package com.example.alex.whereintheworld;
 
 
+import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -11,6 +12,11 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import com.google.android.gms.location.LocationServices;
+
 
 
 import android.app.ProgressDialog;
@@ -30,6 +36,9 @@ import org.json.JSONObject;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    LocationManager locationManager;
+    LocationListener locationListener;
+
     private double latDouble = 0.0;
     private double lngDouble = 0.0;
     private GoogleMap mMap;
@@ -40,6 +49,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new mylocationListener();
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
