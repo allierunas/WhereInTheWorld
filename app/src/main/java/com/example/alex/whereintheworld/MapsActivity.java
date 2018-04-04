@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -17,6 +18,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -39,6 +41,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -53,7 +56,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 new GetCoordinates().execute(edtAddress.getText().toString().replace(" ","+"));
             }
         });
-
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
     private class GetCoordinates extends AsyncTask<String,Void,String> {
@@ -87,6 +90,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         protected void onPostExecute(String s) {
             try{
+                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
                 JSONObject jsonObject = new JSONObject(s);
 
                 String lat = ((JSONArray)jsonObject.get("results")).getJSONObject(0).getJSONObject("geometry")
@@ -97,6 +101,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 latDouble = Double.parseDouble(lat);
                 lngDouble = Double.parseDouble(lng);
 
+                updateMap();
+
                 txtCoord.setText(String.format("Coordinates : %s / %s ",lat,lng));
 
                 if(dialog.isShowing())
@@ -106,6 +112,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 e.printStackTrace();
             }
         }
+    }
+
+    public void updateMap(){
+        LatLng latlng = new LatLng(latDouble, lngDouble);
+        mMap.addMarker(new MarkerOptions().position(latlng).title("New location"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng));
+
     }
 
 
@@ -123,7 +136,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(43.11, 42.35);
+        LatLng sydney = new LatLng(latDouble, lngDouble);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
