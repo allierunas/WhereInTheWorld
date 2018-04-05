@@ -15,7 +15,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import com.google.android.gms.location.LocationServices;
+//import com.google.android.gms.location.LocationServices;
+import android.widget.Toast;
 
 
 
@@ -38,13 +39,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     LocationManager locationManager;
     LocationListener locationListener;
+    Location mLastLocation;
+
 
     private double latDouble = 0.0;
     private double lngDouble = 0.0;
+
+    double tlat;
+    double tlong;
+
     private GoogleMap mMap;
     Button btnShowCoord;
     EditText edtAddress;
     TextView txtCoord;
+    private Button bttnChangeMap;
+    int mapCount = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +62,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         locationListener = new mylocationListener();
+
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Toast.makeText(this, "Open GPS", Toast.LENGTH_LONG).show();
+        }
+
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
 
@@ -69,8 +85,55 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 new GetCoordinates().execute(edtAddress.getText().toString().replace(" ","+"));
             }
         });
+
+        bttnChangeMap = findViewById(R.id.changeMapType);
+        bttnChangeMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+
+                if(mapCount%4 == 0)
+                    mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                else if(mapCount%4 == 1)
+                    mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                else if(mapCount %4 == 2)
+                    mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                else if(mapCount%4 == 3)
+                    mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                else mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
+                mapCount++;
+
+            }
+        });
+
+
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
+
+
+    class mylocationListener implements LocationListener {
+
+        public void onLocationChanged(Location location) {
+            if (location!= null){
+                tlat = location.getLatitude();
+                tlong = location.getLongitude();
+                updateMap();
+            }
+        }
+
+        public void onProviderDisabled(String provider) {
+
+        }
+
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+    }
+
 
     private class GetCoordinates extends AsyncTask<String,Void,String> {
         ProgressDialog dialog = new ProgressDialog(MapsActivity.this);
@@ -156,5 +219,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng sydney = new LatLng(latDouble, lngDouble);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+        mMap.getUiSettings().setCompassEnabled(true);
+        mMap.getUiSettings().setRotateGesturesEnabled(true);
+        mMap.getUiSettings().setScrollGesturesEnabled(true);
+        mMap.getUiSettings().setTiltGesturesEnabled(true);
+
     }
 }
